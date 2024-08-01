@@ -19,8 +19,11 @@ class Hex_web : ComponentActivity() {
         myWebView.setBackgroundColor(Color.TRANSPARENT)
         myWebView.settings.javaScriptEnabled = true
         myWebView.settings.domStorageEnabled = true
+
+        //Allow zooming in and out
         myWebView.settings.builtInZoomControls = true
         myWebView.settings.displayZoomControls = false
+
         myWebView.webViewClient = WebViewClient()
         CookieManager.getInstance().setAcceptThirdPartyCookies(myWebView, true)
         myWebView.loadUrl("https://hexrpg.com")
