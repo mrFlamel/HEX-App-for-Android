@@ -1,18 +1,22 @@
 package com.example.hex_android
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.ConnectivityManager
 import android.os.Bundle
+import android.view.View
 import android.webkit.CookieManager
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.ImageView
 import androidx.activity.ComponentActivity
 import com.example.hex_android.DetectConnection.checkInternetConnection
 
 
 private lateinit var myWebView: WebView
 private lateinit var mainContext: Context
+private lateinit var loadingIcon: ImageView
 
 
 var errorPage: String = """<head>
@@ -65,8 +69,8 @@ var errorPage: String = """<head>
   </head>
   <body>
     <center>
-      <span id="brand">Error 106</span>
-      <p>No internet connection!</p>
+      <span id="brand">No internet</span>
+      <p>PEEVES!!! Router is not a toy!!!</p>
       <a href="https://hexrpg.com">
       Try again
       </a>
@@ -80,6 +84,7 @@ class Hex_web : ComponentActivity() {
         setContentView(R.layout.activity_hex_web)
         window.decorView.setBackgroundColor(Color.BLACK)
 
+        loadingIcon = findViewById(R.id.loadingLogo)
         myWebView = findViewById(R.id.webview_box)
         myWebView.setBackgroundColor(Color.TRANSPARENT)
         myWebView.settings.javaScriptEnabled = true
@@ -131,5 +136,16 @@ private class CustomWebViewClient : WebViewClient() {
         if (!checkInternetConnection(mainContext)) {
             myWebView.loadDataWithBaseURL("https://hexrpg.com", errorPage, "text/html", "utf-8", "https://hexrpg.com")
         }
+    }
+
+    override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+        super.onPageStarted(view, url, favicon)
+        //For adding loading icon, remove comment
+        //loadingIcon.visibility = View.VISIBLE
+    }
+
+    override fun onPageFinished(view: WebView?, url: String?) {
+        super.onPageFinished(view, url)
+        loadingIcon.visibility = View.INVISIBLE
     }
 }
