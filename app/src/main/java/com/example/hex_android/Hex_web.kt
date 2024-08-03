@@ -15,13 +15,14 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ImageView
+import android.widget.ProgressBar
 import androidx.activity.ComponentActivity
 import com.example.hex_android.DetectConnection.checkInternetConnection
 
 
 private lateinit var myWebView: WebView
 private lateinit var mainContext: Context
-private lateinit var loadingIcon: ImageView
+private lateinit var progressBar: ProgressBar
 
 
 var errorPage: String = """
@@ -91,7 +92,7 @@ class Hex_web : ComponentActivity() {
         setContentView(R.layout.activity_hex_web)
         window.decorView.setBackgroundColor(Color.BLACK)
 
-        loadingIcon = findViewById(R.id.loadingLogo)
+        progressBar = findViewById(R.id.progressBar)
         myWebView = findViewById(R.id.webview_box)
         myWebView.setBackgroundColor(Color.TRANSPARENT)
         myWebView.settings.javaScriptEnabled = true
@@ -112,6 +113,9 @@ class Hex_web : ComponentActivity() {
         } else {
             myWebView.loadUrl("https://www.hexrpg.com");
         }
+
+
+
     }
 
     override fun onBackPressed() {
@@ -135,8 +139,8 @@ object DetectConnection {
 // Function to load all URLs in same webview
 private class CustomWebViewClient : WebViewClient() {
     override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
+        progressBar.visibility = View.VISIBLE
         view.loadUrl(url)
-
         return true
     }
 
@@ -148,13 +152,7 @@ private class CustomWebViewClient : WebViewClient() {
 
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         super.onPageStarted(view, url, favicon)
-        //For adding loading icon, remove comment
-        //loadingIcon.visibility = View.VISIBLE
-    }
-
-    override fun onPageFinished(view: WebView?, url: String?) {
-        super.onPageFinished(view, url)
-        loadingIcon.visibility = View.INVISIBLE
+        progressBar.visibility = View.INVISIBLE
     }
 
     override fun onReceivedError(
