@@ -4,9 +4,14 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.ConnectivityManager
+import android.net.http.SslError
 import android.os.Bundle
 import android.view.View
 import android.webkit.CookieManager
+import android.webkit.SslErrorHandler
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ImageView
@@ -19,7 +24,8 @@ private lateinit var mainContext: Context
 private lateinit var loadingIcon: ImageView
 
 
-var errorPage: String = """<head>
+var errorPage: String = """
+    <head>
     <title>offline</title>
     <!-- meta tags -->
     <meta charset="UTF-8" />
@@ -69,13 +75,14 @@ var errorPage: String = """<head>
   </head>
   <body>
     <center>
-      <span id="brand">No internet</span>
-      <p>PEEVES!!! Router is not a toy!!!</p>
+      <span id="brand">${"$"}{errorTitle}</span>
+      <p>${"$"}{errorSubTitle}</p>
       <a href="https://hexrpg.com">
-      Try again
+      Return to homepage
       </a>
     </center>
   </body>"""
+
 
 class Hex_web : ComponentActivity() {
 
@@ -89,6 +96,7 @@ class Hex_web : ComponentActivity() {
         myWebView.setBackgroundColor(Color.TRANSPARENT)
         myWebView.settings.javaScriptEnabled = true
         myWebView.settings.domStorageEnabled = true
+        myWebView.settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
 
         //Allow zooming in and out
         myWebView.settings.builtInZoomControls = true
@@ -99,7 +107,7 @@ class Hex_web : ComponentActivity() {
 
         mainContext = this
         if (!DetectConnection.checkInternetConnection(this)) {
-            myWebView.loadDataWithBaseURL("https://hexrpg.com", errorPage, "text/html", "utf-8", "https://hexrpg.com")
+            handleError("No internet", "PEEVES!!! Router is not a toy!!!")
 
         } else {
             myWebView.loadUrl("https://www.hexrpg.com");
@@ -134,7 +142,7 @@ private class CustomWebViewClient : WebViewClient() {
 
     override fun onLoadResource(view: WebView, url: String) {
         if (!checkInternetConnection(mainContext)) {
-            myWebView.loadDataWithBaseURL("https://hexrpg.com", errorPage, "text/html", "utf-8", "https://hexrpg.com")
+            handleError("No internet", "PEEVES!!! Router is not a toy!!!")
         }
     }
 
@@ -148,4 +156,44 @@ private class CustomWebViewClient : WebViewClient() {
         super.onPageFinished(view, url)
         loadingIcon.visibility = View.INVISIBLE
     }
+
+    override fun onReceivedError(
+        view: WebView?,
+        errorCode: Int,
+        description: String?,
+        failingUrl: String?
+    ) {
+        super.onReceivedError(view, errorCode, description, failingUrl)
+        if (failingUrl!!.contains("hexrpg.com")){
+            handleError("Error " + errorCode.toString(), description ?: "Something went wrong...")
+        }
+    }
+    override fun onReceivedHttpError(view: WebView?, request: WebResourceRequest?, errorResponse: WebResourceResponse?) {
+        super.onReceivedHttpError(view, request, errorResponse)
+        handleError("Error " + errorResponse!!.statusCode.toString(), errorResponse.reasonPhrase)
+    }
+
+    override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
+        super.onReceivedSslError(view, handler, error)
+        handleError("Error " + error, "Don't be so stupid, SSl!")
+    }
+}
+
+//This VVV actually handles all errors...
+private fun handleError(errorTitle: String, errorSubtitle: String) {
+    val errorVariables = mapOf(
+        "errorTitle" to errorTitle,
+        "errorSubTitle" to errorSubtitle
+    )
+    val filledText = fillTemplate(errorPage, errorVariables)
+    myWebView.loadDataWithBaseURL("https://hexrpg.com", filledText, "text/html", "utf-8", "https://hexrpg.com")
+
+}
+
+private fun fillTemplate(template: String, variables: Map<String, String>): String {
+    var result = template
+    for ((key, value) in variables) {
+        result = result.replace("\${$key}", value)
+    }
+    return result
 }
