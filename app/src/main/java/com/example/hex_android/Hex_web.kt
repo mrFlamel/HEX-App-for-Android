@@ -14,7 +14,6 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.ImageView
 import android.widget.ProgressBar
 import androidx.activity.ComponentActivity
 import com.example.hex_android.DetectConnection.checkInternetConnection
@@ -97,7 +96,8 @@ class Hex_web : ComponentActivity() {
         myWebView.setBackgroundColor(Color.TRANSPARENT)
         myWebView.settings.javaScriptEnabled = true
         myWebView.settings.domStorageEnabled = true
-        myWebView.settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+        myWebView.clearCache(false)
+        myWebView.settings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
 
         //Allow zooming in and out
         myWebView.settings.builtInZoomControls = true
@@ -108,7 +108,7 @@ class Hex_web : ComponentActivity() {
 
         mainContext = this
         if (!DetectConnection.checkInternetConnection(this)) {
-            handleError("No internet", "PEEVES!!! Router is not a toy!!!")
+            handleError("Lost connection", "Peeves! Router is not a toy!")
 
         } else {
             myWebView.loadUrl("https://www.hexrpg.com");
@@ -146,7 +146,7 @@ private class CustomWebViewClient : WebViewClient() {
 
     override fun onLoadResource(view: WebView, url: String) {
         if (!checkInternetConnection(mainContext)) {
-            handleError("No internet", "PEEVES!!! Router is not a toy!!!")
+            handleError("Lost connection", "Peeves! Router is not a toy!")
         }
     }
 
