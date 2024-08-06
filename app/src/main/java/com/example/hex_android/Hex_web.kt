@@ -136,7 +136,9 @@ private class CustomWebViewClient(val context: Context) : WebViewClient() {
         }
     }
     override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
-        Toast.makeText(context, error.toString(), Toast.LENGTH_LONG).show()
+        if (error!!.url.toString().startsWith("https://hexrpg.com")){
+            Toast.makeText(context, error.toString(), Toast.LENGTH_LONG).show()
+        }
     }
 }
 
