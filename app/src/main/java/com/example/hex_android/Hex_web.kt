@@ -59,7 +59,8 @@ class Hex_web : ComponentActivity() {
         if (!checkInternetConnection(this)) {
             handleError("Lost connection", "Peeves! Router is not a toy!")
         } else {
-            myWebView.loadUrl("https://www.hexrpg.com");
+            val uri = intent?.dataString
+            myWebView.loadUrl(uri ?: "https://hexrpg.com")
         }
     }
 
